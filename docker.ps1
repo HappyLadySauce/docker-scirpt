@@ -9,6 +9,24 @@ $CYAN = 'Cyan'
 $PURPLE = 'Magenta'
 $GRAY = 'Gray'
 
+###############################################################################################################################
+# clear
+# echo -e $LIGHT_PURPLE"========================================[ Welcome! ]========================================="$NONE
+# echo -e $LIGHT_PURPLE"===================================[ Thanks for using! ]====================================="$NONE
+# echo -e $LIGHT_BLUE'
+#              _  _                     _            _      ___
+#             | || |__ _ _ __ _ __ _  _| |   __ _ __| |_  _/ __| __ _ _  _ __ ___
+#             | __ / _` | "_ \ "_ \ || | |__/ _` / _` | || \__ \/ _` | || / _/ -_)
+#             |_||_\__,_| .__/ .__/\_, |____\__,_\__,_|\_, |___/\__,_|\_,_\__\___|
+#                       |_|  |_|   |__/                |__/
+# '$NONE
+# echo -e "                         "$LIGHT_CYAN"github:"$NONE $YELLOW"https://github.com/HappyLadySauce"$NONE
+# echo -e "                          "$LIGHT_CYAN"gitee:"$NONE $YELLOW"https://gitee.com/HappyLadySauce"$NONE
+# echo -e "                           "$LIGHT_CYAN"csdn:"$NONE $YELLOW"https://blog.csdn.net/m0_73928695"$NONE
+# echo -e "                              "$LIGHT_CYAN"blog:"$NONE $YELLOW"https://happlelaoganma.cn"$NONE
+# echo -e $LIGHT_PURPLE"===================================[ Thanks for using! ]====================================="$NONE
+###############################################################################################################################
+
 # 颜色输出函数
 function Write-ColorOutput {
     param(
