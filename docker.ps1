@@ -821,12 +821,7 @@ switch ($operationMode) {
                     $targetImage = "$($params.registry)/$($params.project)/$imageName`:$tag"
                 }
                 else {
-                    # 如果设置了targetRegistry则使用它，否则使用docker.io
-                    $repoPrefix = "docker.io"
-                    if ($params.targetRegistry) {
-                        $repoPrefix = $params.targetRegistry
-                    }
-                    $targetImage = "$($params.registry)/$repoPrefix/$imageName`:$tag"
+                    $targetImage = "$($params.registry)/$imageName`:$tag"
                 }
             }
             

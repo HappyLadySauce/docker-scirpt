@@ -840,23 +840,6 @@ case $operation_mode in
             
             ((total++))
             
-            # 处理源仓库前缀
-            if [ -n "$source_registry" ]; then
-                source_image="${source_registry}/${image}"
-            else
-                source_image="$image"
-            fi
-            
-            # 检查源镜像是否存在
-            if ! docker inspect "$source_image" &>/dev/null; then
-                echo -e "${BLUE}[拉取] 镜像 $source_image 不存在，尝试拉取...${NONE}"
-                if ! docker pull "$source_image"; then
-                    echo -e "${RED}[失败] 无法拉取镜像: $source_image${NONE}"
-                    ((failed++))
-                    continue
-                fi
-            fi
-            
             # 提取镜像名称和标签
             if [[ $image == *":"* ]]; then
                 image_name=$(echo "$image" | cut -d':' -f1)
@@ -866,38 +849,17 @@ case $operation_mode in
                 tag="latest"
             fi
             
-            # 提取原始镜像的主机地址作为目标仓库的目录
-            # 如果是完整镜像名(包含主机地址)
-            if [[ $image_name == *"."* && $image_name == *"/"* ]]; then
-                # 提取主机部分，例如 quay.io
-                host=$(echo "$image_name" | cut -d'/' -f1)
-                # 提取剩余部分，例如 jetstack/cert-manager-cainjector
-                remainder=$(echo "$image_name" | cut -d'/' -f2-)
-                
-                # 构建目标镜像名，格式: registry.example.com/quay.io/jetstack/cert-manager-cainjector:v1.17.2
-                if [ -n "$project" ]; then
-                    target_image="${registry}/${project}/${host}/${remainder}:${tag}"
-                else
-                    target_image="${registry}/${host}/${remainder}:${tag}"
-                fi
+            # 处理没有主机地址的镜像(如Docker Hub上的镜像)
+            if [ -n "$project" ]; then
+                target_image="${registry}/${project}/${image_name}:${tag}"
             else
-                # 处理没有主机地址的镜像(如Docker Hub上的镜像)
-                if [ -n "$project" ]; then
-                    target_image="${registry}/${project}/${image_name}:${tag}"
-                else
-                    # 如果设置了target_registry则使用它，否则使用docker.io
-                    local repo_prefix="docker.io"
-                    if [ -n "$target_registry" ]; then
-                        repo_prefix="$target_registry"
-                    fi
-                    target_image="${registry}/${repo_prefix}/${image_name}:${tag}"
-                fi
+                target_image="${registry}/${image_name}:${tag}"
             fi
             
             # 标记镜像
-            echo -e "${BLUE}[标记] $source_image -> $target_image${NONE}"
-            if ! docker tag "$source_image" "$target_image"; then
-                echo -e "${RED}[失败] 无法标记镜像: $source_image -> $target_image${NONE}"
+            echo -e "${BLUE}[标记] $image -> $target_image${NONE}"
+            if ! docker tag "$image" "$target_image"; then
+                echo -e "${RED}[失败] 无法标记镜像: $image -> $target_image${NONE}"
                 ((failed++))
                 continue
             fi
@@ -907,17 +869,11 @@ case $operation_mode in
             if docker push "$target_image"; then
                 echo -e "${GREEN}[成功] 推送镜像: $target_image${NONE}"
                 ((success++))
-                
-                # 清理临时标记
-                docker rmi "$target_image" &>/dev/null
             else
                 echo -e "${RED}[失败] 推送镜像: $target_image${NONE}"
                 echo -e "${YELLOW}提示: 可能需要先登录到私有仓库: ${NONE}"
                 echo -e "${CYAN}    docker login $registry${NONE}"
                 ((failed++))
-                
-                # 清理失败的标记
-                docker rmi "$target_image" &>/dev/null
             fi
         done <<< "$(echo "$images_list")"
         
