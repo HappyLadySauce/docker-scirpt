@@ -849,10 +849,29 @@ case $operation_mode in
                 tag="latest"
             fi
             
-            # 处理没有主机地址的镜像(如Docker Hub上的镜像)
-            if [ -n "$project" ]; then
+            # 处理镜像名称
+            if [ -n "$target_registry" ]; then
+                # 提取镜像名称，移除可能存在的域名部分
+                if [[ "$image_name" == *"/"* ]]; then
+                    # 检查是否是域名（包含.）或标准仓库（包含/）
+                    if [[ "$image_name" == *"."*"/"* ]] || [[ "$image_name" == *"/"*"/"* ]]; then
+                        # 移除域名部分，保留路径
+                        simple_name="${image_name#*/}"
+                    else
+                        simple_name="$image_name"
+                    fi
+                else
+                    simple_name="$image_name"
+                fi
+                
+                # 使用target_registry作为命名空间
+                target_image="${registry}/${target_registry}/${simple_name}:${tag}"
+                echo -e "${BLUE}[处理] 使用目标仓库前缀: $target_registry${NONE}"
+            elif [ -n "$project" ]; then
+                # 使用project作为前缀
                 target_image="${registry}/${project}/${image_name}:${tag}"
             else
+                # 不使用额外前缀
                 target_image="${registry}/${image_name}:${tag}"
             fi
             
